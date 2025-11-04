@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+
+metadata:
+  name: first-pvc
+
+spec:
+  # Define the storage requirements
+  resources:
+    requests:
+      storage: 1Gi
+  # Define the access mode and storage class
+  accessModes:
+    - ReadWriteOnce
+  # Define the storage class
+  storageClassName: standard
+
+  selector:
+    # Select the PV by label
+    matchLabels:
+      name: first-pvc
+
+# comandos úteis:
+# kubectl apply -f pvc.yaml -n primeira-aplicacao
+# kubectl delete -f pvc.yaml n primeira-aplicacao
+# kubectl get pvc -n primeira-aplicacao
+# kubectl describe pvc first-pvc -n primeira-aplicacao
+
+# para executar um pod no modo interativo com o pvc montado
+# kubectl exec -it <nome-pod> -n primeira-aplicacao -- /bin/sh digite: exit para sair

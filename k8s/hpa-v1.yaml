@@ -1,0 +1,21 @@
+# a versão do HPA v1 foi depreciada, usar a v2
+
+# apiVersion: autoscaling/v1
+# kind: HorizontalPodAutoscaler
+
+# metadata:
+#   name: app-ts-hpa
+# spec:
+#   scaleTargetRef:
+#     apiVersion: apps/v1
+#     kind: Deployment
+#     name: app-ts
+#   minReplicas: 3
+#   maxReplicas: 8
+#   targetCPUUtilizationPercentage: 75
+
+# Comandos para rodar o HPA no kubernetes
+# kubectl apply -f app-ts/k8s/hpa-v1.yaml -n primeira-aplicacao
+# kubectl get hpa -n primeira-aplicacao
+# kubectl delete hpa -n primeira-aplicacao
+

@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: PersistentVolume
+
+metadata:
+  name: first-pv
+  labels:
+    name: first-pv
+
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+    # ReadWriteOnce: the volume can be mounted as read-write by a single node
+    # ReadOnlyMany: the volume can be mounted as read-only by many nodes
+    # ReadWriteMany: the volume can be mounted as read-write by many nodes
+    # ReadWriteOncePod: the volume can be mounted as read-write by a single pod
+  # persistentVolumeReclaimPolicy: Retain | Recycle | Delete
+  persistentVolumeReclaimPolicy: Delete
+  # name of the storage class - default is 'standard'
+  storageClassName: standard
+  # hostPath volume for local storage
+  hostPath:
+    path: /mnt/data
+  
+# comandos úteis:
+# kubectl apply -f pv.yaml
+# kubectl delete -f pv.yaml
+# kubectl get pv
+# kubectl describe pv first-pv

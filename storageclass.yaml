@@ -1,0 +1,23 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+
+metadata:
+  name: first-storage-class
+
+#kubectl get storageclass
+# AWS: kubernetes.io/aws-ebs
+# local: rancher.io/local-path
+# no provisioner: kubernetes.io/no-provisioner
+provisioner: kubernetes.io/no-provisioner
+# Retain: the PV will not be deleted automatically when released
+# Delete: the PV will be deleted automatically when released
+# Recycle: the PV's data will be scrubbed and the volume will be made available again
+reclaimPolicy: Retain
+# This setting ensures that the volume is not bound until a pod using the PVC is created
+# This is particularly useful for local storage scenarios
+volumeBindingMode: WaitForFirstConsumer
+
+# comandos úteis:
+# kubectl apply -f storageclass.yaml
+# kubectl get storageclass
+# kubectl describe storageclass first-storage-class

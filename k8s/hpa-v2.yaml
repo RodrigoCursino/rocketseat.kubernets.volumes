@@ -1,0 +1,51 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+
+metadata:
+  name: app-ts-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: app-ts
+  minReplicas: 6
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 75
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 0
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 15
+    scaleDown:
+      stabilizationWindowSeconds: 30 # deafault 300 seconds
+      policies:
+        - type: Pods
+          value: 2
+          periodSeconds: 15
+    # você pode configurar múltiplas políticas de scale down
+    #     - type: Percent
+    #       value: 20
+    #       periodSeconds: 15
+      #para escolher a política de seleção com a diretiva abaixo MAX ou MIN, o MAX é a mais agressiva e o MIN a mais conservadora
+      #selectPolicy: Max
+# Comandos para rodar o HPA no kubernetes
+# kubectl apply -f app-ts/k8s/hpa-v2.yaml -n primeira-aplicacao
+# kubectl get hpa -n primeira-aplicacao
+# kubectl delete hpa -n primeira-aplicacao
+
+# Teste de estresse na aplicação
+# kubectl run -it fortio -n primeira-aplicacao --rm --image=fortio/fortio -- load -qps 6000 -t 120s -c 50 "http://app-ts-svc/example-k8s"

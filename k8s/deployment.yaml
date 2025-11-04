@@ -1,0 +1,130 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: app-ts
+
+spec:
+  replicas: 6
+  strategy:
+    #type: Recreate
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 20%
+      maxUnavailable: 10%
+  selector:
+    matchLabels:
+      api: app-ts
+  template:
+    metadata:
+      labels:
+        api: app-ts
+    spec:
+      containers:
+        - name: app-ts
+          image: rcursino/app-ts:v10
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: app-ts
+            - secretRef:
+                name: app-ts-secrets
+          # Interpolação de variáveis de ambiente a partir de ConfigMap e Secret
+          # env:
+          #   - name: APP
+          #     valueFrom:
+          #       configMapKeyRef:
+          #         name: app-ts
+          #         key: app-name
+
+          #   - name: APP_KEY
+          #     valueFrom:
+          #       secretKeyRef:
+          #         name: app-ts-secrets
+          #         key: api-key
+          ports:
+            - containerPort: 3000
+          # Probes de Liveness, Readiness e StartupProbe
+          # StartupProbe é usado para verificar se a aplicação iniciou corretamente
+          startupProbe:
+            # Pode-se usar comando exec ou httpGet
+            # exec:
+            #   command:
+            #     - /bin/sh
+            #     - -c
+            #     - check-startup.sh
+            # Alternativamente, pode-se usar httpGet para verificar um endpoint
+            httpGet:
+              path: /healthz
+              port: 3000
+            # tempo para iniciar a verificação de integridade
+            initialDelaySeconds: 10
+            # intervalo entre as tentativas de verificação
+            periodSeconds: 10
+            # quantidade de falhas permitidas antes de considerar o pod como não iniciado
+            failureThreshold: 3
+            # quantidade de sucessos necessários para considerar o pod como iniciado
+            successThreshold: 1
+            # tempo limite para a resposta da verificação
+            timeoutSeconds: 1
+          # Readiness Probe verifica se a aplicação está pronta para receber tráfego de rede 
+          readinessProbe:
+            httpGet: 
+              path: /readyz
+              port: 3000
+            periodSeconds: 15
+            initialDelaySeconds: 5
+            failureThreshold: 3
+            successThreshold: 1
+            timeoutSeconds: 1
+          # Liveness Probe verifica se a aplicação está viva
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            requests:
+              memory: 192Mi
+              cpu: 400m
+            limits:
+              memory: 256Mi
+              cpu: 700m
+          volumeMounts:
+            - name: app-ts-data
+              mountPath: /usr/src/app/uploads
+      volumes:
+        - name: app-ts-data
+          persistentVolumeClaim:
+            claimName: first-pvc
+
+# Comandos para rodar a aplicação no kubernetes
+#kubectl create ns primeira-aplicacao
+#kubectl apply -f app-ts/k8s/deployment.yml -n primeira-aplicacao
+#kubectl get pods -n primeira-aplicacao
+# Esse comando abaixo é para visualizar o histórico de deploys
+#kubectl rollout history deployment/app-ts -n primeira-aplicacao
+# Esse conmando abaixo é para fazer rollback para a versão anterior
+# 1- Volta para a versão anterior
+#kubectl rollout undo deployment/app-ts -n primeira-aplicacao
+# 2- Volta para uma versão específica
+#kubectl rollout undo --to-revision=2  deployment/app-ts -n primeira-aplicacao
+
+#------------------------------
+# Exemplo de configuração de estratégia de deployment
+# RollingUpdate: Atualiza os pods gradativamente
+# Recreate: Destroi todos os pods antigos antes de criar os novos
+# strategy:
+#     type: Recreate|RollingUpdate
+# RollingUpdate:
+#   maxSurge: Número máximo de pods adicionais que podem ser criados durante a atualização
+#   maxUnavailable: Número máximo de pods que podem estar indisponíveis durante a atualização
+#   strategy:
+#       type: RollingUpdate
+#       rollingUpdate:
+#         maxSurge: 2
+#         maxUnavailable: 1
