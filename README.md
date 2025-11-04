@@ -178,7 +178,3 @@ Na sequência:
   * `PersistentVolume` (PV)
   * `PersistentVolumeClaim` (PVC)
 * Testar o vínculo desses objetos com uma aplicação real no cluster.
-
----
-
-Quer que eu já gere o **arquivo `.md` para download** com esse conteúdo?
